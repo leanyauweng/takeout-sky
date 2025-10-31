@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itheima.mapper.OrderMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into orders
+        (user_id, address_book_id, number, consignee, phone, address, status,
+        cancel_reason, rejection_reason, cancel_time, order_time, estimated_delivery_time,
+        checkout_time, delivery_status, pay_method, delivery_time, pay_status,
+        pack_amount, amount, tableware_number, remark, tableware_status,
+        create_time, update_time)
+        values
+        (#{userId}, #{addressBookId}, #{number}, #{consignee}, #{phone}, #{address}, #{status},
+        #{cancelReason}, #{rejectionReason}, #{cancelTime}, #{orderTime}, #{estimatedDeliveryTime},
+        #{checkoutTime}, #{deliveryStatus}, #{payMethod}, #{deliveryTime}, #{payStatus},
+        #{packAmount}, #{amount}, #{tablewareNumber}, #{remark}, #{tablewareStatus},
+        #{createTime}, #{updateTime})
+    </insert>
+    <update id="update">
+        UPDATE orders
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="cancelReason != null">cancel_reason = #{cancelReason},</if>
+            <if test="cancelTime != null">cancel_time = #{cancelTime},</if>
+            <if test="estimatedDeliveryTime != null">estimated_delivery_time = #{estimatedDeliveryTime},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="cancelById">
+        UPDATE orders
+        SET status = #{status}, cancel_reason = #{reason}, cancel_time = NOW()
+        WHERE id = #{id} AND status IN (1, 2)
+    </update>
+
+    <update id="rejectById">
+        UPDATE orders
+        SET status = #{status}, rejection_reason = #{reason}, cancel_time = NOW()
+        WHERE id = #{id} AND status = 2
+    </update>
+    <update id="admincancelById">
+        UPDATE orders
+        SET status = #{status}, rejection_reason = #{reason}, cancel_time = NOW()
+        WHERE id = #{id} AND status = 3
+    </update>
+
+    <select id="sumByMap" resultType="java.lang.Double">
+        SELECT SUM(amount) FROM orders
+        WHERE
+        1 = 1
+        <if test="begin != null">
+            AND order_time &gt;= #{begin}
+        </if>
+        <if test="end != null">
+            AND order_time &lt;= #{end}
+        </if>
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+    </select>
+    <select id="countByMap" resultType="java.lang.Integer">
+        SELECT count(id) from orders
+        <where>
+            <if test="begin != null">
+                and order_time &gt; #{begin}
+            </if>
+            <if test="end != null">
+                and order_time &lt; #{end}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+    <select id="getSalesTop10" resultType="com.itheima.pojo.dto.GoodSalesDTO">
+        SELECT od.name,sum(od.number) number
+        from order_detail od,orders o
+        where od.order_id = o.id and o.status = 5
+        <if test="begin != null">
+            and o.order_time &gt; #{begin}
+        </if>
+        <if test="end != null">
+            and o.order_time &lt; #{end}
+        </if>
+        group by od.name
+        order by number desc
+        limit 0,10
+    </select>
+
+
+    <select id="selectById" resultType="com.itheima.pojo.entity.Orders">
+        SELECT * FROM orders WHERE id = #{id}
+    </select>
+
+    <resultMap id="OrderWithDetailsMap" type="com.itheima.pojo.entity.Orders">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="addressBookId" column="address_book_id"/>
+        <result property="number" column="number"/>
+        <result property="consignee" column="consignee"/>
+        <result property="phone" column="phone"/>
+        <result property="address" column="address"/>
+        <result property="status" column="status"/>
+        <result property="amount" column="amount"/>
+        <result property="remark" column="remark"/>
+        <collection property="orderDetails"
+                    ofType="com.itheima.pojo.entity.OrderDetail"
+                    column="id"
+                    select="selectOrderDetailsByOrderId"/>
+    </resultMap>
+
+    <select id="selectOrderWithDetails" resultMap="OrderWithDetailsMap">
+        SELECT * FROM orders WHERE id = #{id}
+    </select>
+
+    <select id="selectOrderDetailsByOrderId" resultType="com.itheima.pojo.entity.OrderDetail">
+        SELECT id, order_id, name, number, amount, image
+        FROM order_detail
+        WHERE order_id = #{orderId}
+    </select>
+    <select id="pageQuery" resultType="com.itheima.pojo.entity.Orders">
+        SELECT * FROM orders
+        WHERE 1=1
+        <if test="number != null and number != ''">
+            AND number LIKE CONCAT('%', #{number}, '%')
+        </if>
+        <if test="phone != null and phone != ''">
+            AND phone = #{phone}
+        </if>
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        <if test="startDate != null">
+            AND order_time &gt;= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND order_time &lt;= #{endDate}
+        </if>
+        ORDER BY order_time DESC
+    </select>
+
+</mapper>

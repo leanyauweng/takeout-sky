@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket 测试</title>
+</head>
+<body>
+<h2>WebSocket 测试页面</h2>
+
+<p>
+    <label>客户端ID：</label>
+    <input type="text" id="sid" value="user1">
+    <button onclick="connect()">连接</button>
+    <button onclick="disconnect()">断开</button>
+</p>
+
+<p>
+    <label>消息：</label>
+    <input type="text" id="msg" value="你好，服务端！">
+    <button onclick="sendMessage()">发送</button>
+</p>
+
+<div id="log" style="border:1px solid #ccc; padding:10px; width:400px; height:200px; overflow:auto;">
+    <b>消息日志：</b><br>
+</div>
+
+<script>
+    let socket;
+
+    function log(message) {
+        let logDiv = document.getElementById("log");
+        logDiv.innerHTML += message + "<br>";
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function connect() {
+        let sid = document.getElementById("sid").value;
+        let url = "ws://localhost:8080/ws/" + sid;
+        socket = new WebSocket(url);
+
+        socket.onopen = function () {
+            log("✅ 已连接 WebSocket：" + url);
+        };
+
+        socket.onmessage = function (event) {
+            log("📩 收到消息：" + event.data);
+        };
+
+        socket.onclose = function () {
+            log("❌ 连接已关闭");
+        };
+
+        socket.onerror = function (error) {
+            log("⚠️ 发生错误：" + error);
+        };
+    }
+
+    function disconnect() {
+        if (socket) {
+            socket.close();
+            socket = null;
+        }
+    }
+
+    function sendMessage() {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            let msg = document.getElementById("msg").value;
+            socket.send(msg);
+            log("➡️ 发送消息：" + msg);
+        } else {
+            log("⚠️ WebSocket 未连接");
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itheima.mapper.PaymentMapper">
+
+    <update id="update">
+        update orders
+        set
+        user_id = #{userId},
+        address_book_id = #{addressBookId},
+        number = #{number},
+        consignee = #{consignee},
+        phone = #{phone},
+        address = #{address},
+        status = #{status},
+        cancel_reason = #{cancelReason},
+        rejection_reason = #{rejectionReason},
+        cancel_time = #{cancelTime},
+        order_time = #{orderTime},
+        estimated_delivery_time = #{estimatedDeliveryTime},
+        checkout_time = #{checkoutTime},
+        delivery_status = #{deliveryStatus},
+        pay_method = #{payMethod},
+        delivery_time = #{deliveryTime},
+        pay_status = #{payStatus},
+        pack_amount = #{packAmount},
+        amount = #{amount},
+        tableware_number = #{tablewareNumber},
+        remark = #{remark},
+        tableware_status = #{tablewareStatus},
+        create_time = #{createTime},
+        update_time = #{updateTime}
+        where id = #{id}
+    </update>
+
+    <select id="getByNumberAndUserId" resultType="com.itheima.pojo.entity.Orders">
+        select * from orders
+        where number = #{number} and user_id = #{userId}
+    </select>
+</mapper>

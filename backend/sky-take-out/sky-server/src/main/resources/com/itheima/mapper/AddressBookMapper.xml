@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itheima.mapper.AddressBookMapper">
+    <insert id="insert">
+        INSERT INTO address_book
+        (user_id, consignee, sex, phone, state_name, city_name, postcode, detail, label, is_default, create_time, update_time)
+        VALUES
+        (#{userId}, #{consignee}, #{sex}, #{phone}, #{stateName}, #{cityName}, #{postcode}, #{detail}, #{label}, #{isDefault}, NOW(), NOW())
+
+    </insert>
+    <update id="update">
+        UPDATE address_book
+        <set>
+            <if test="consignee != null">consignee = #{consignee},</if>
+            <if test="sex != null">sex = #{sex},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="stateName != null">state_name = #{stateName},</if>
+            <if test="cityName != null">city_name = #{cityName},</if>
+            <if test="postcode != null">postcode = #{postcode},</if>
+            <if test="detail != null">detail = #{detail},</if>
+            <if test="label != null">label = #{label},</if>
+            <if test="isDefault != null">is_default = #{isDefault},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+
+    <select id="list" resultType="com.itheima.pojo.entity.AddressBook">
+        SELECT *
+        FROM address_book
+        <where>
+            <if test="userId != null">
+                AND user_id = #{userId}
+            </if>
+            <if test="phone != null">
+                AND phone = #{phone}
+            </if>
+            <if test="isDefault != null">
+                AND is_Default = #{isDefault}
+            </if>
+        </where>
+    </select>
+</mapper>
